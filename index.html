@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>@sles1401 — Story Highlight Design Studio</title>
+<style>
+  :root {
+    --bg: #EFEAE1;
+    --card: #FAF7F2;
+    --ink: #2E2A26;
+    --muted: #6E675F;
+    --sage: #6B7B63;
+    --clay: #B87A5E;
+    --border: rgba(46, 42, 38, 0.14);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 36px 28px 64px;
+  }
+  header {
+    max-width: 1280px;
+    margin: 0 auto 32px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+  h1 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    font-size: 30px;
+    margin: 0 0 6px;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .15s ease;
+  }
+  .tab.active {
+    background: var(--ink);
+    color: #FAF7F2;
+    border-color: var(--ink);
+  }
+  .grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .slide-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(46, 42, 38, 0.05);
+  }
+  .canvas-wrap {
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #F4EFE6;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn {
+    background: var(--sage);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn-secondary {
+    background: var(--ink);
+    color: #FAF7F2;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .editor {
+    max-width: 1280px;
+    margin: 0 auto 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: none;
+  }
+  .editor.open { display: block; }
+  .editor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    background: #fff;
+    color: var(--ink);
+  }
+  textarea { min-height: 70px; resize: vertical; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>@sles1401 — Story Highlight Studio</h1>
+    <div class="sub">Warm Analog Aesthetic · 1080×1920 px siap upload ke Instagram Story</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchSet('about', this)">Highlight 1: About / Start</button>
+    <button class="tab" onclick="switchSet('notes', this)">Highlight 2: Notes / Learn</button>
+    <button class="btn-secondary" onclick="toggleEditor()">Edit Teks Notes / Learn</button>
+    <button class="btn-secondary" onclick="downloadAll()">Download Semua PNG</button>
+  </div>
+</header>
+
+<section id="notesEditor" class="editor">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <strong>Sesuaikan Teks Template "Notes / Learn" (Live Preview)</strong>
+    <span class="sub">Ubah isi di bawah untuk membuat catatan buku/teknologi baru</span>
+  </div>
+  <div class="editor-grid">
+    <div>
+      <label>Slide 2 — Judul Tech/QA Note</label>
+      <input id="edTechTitle" value="1 hal yang kupelajari tentang QA &amp; Testing:" oninput="renderAll()" />
+      <label style="margin-top:8px;">Isi Refleksi Tech</label>
+      <textarea id="edTechBody" oninput="renderAll()">Menulis test case bukan sekadar mencari bug, tapi memastikan pengalaman pengguna tetap tenang dan dapat diandalkan.</textarea>
+      <label style="margin-top:8px;">Takeaway Singkat</label>
+      <input id="edTechTakeaway" value="Detail kecil hari ini menyelamatkan waktu esok hari." oninput="renderAll()" />
+    </div>
+    <div>
+      <label>Slide 3 — Judul Buku / Bacaan</label>
+      <input id="edBookTitle" value="Catatan dari Bacaan Minggu Ini" oninput="renderAll()" />
+      <label style="margin-top:8px;">Judul Buku &amp; Penulis</label>
+      <input id="edBookName" value="Deep Work — Cal Newport" oninput="renderAll()" />
+      <label style="margin-top:8px;">Kutipan / Intisari</label>
+      <textarea id="edBookBody" oninput="renderAll()">Fokus tanpa gangguan adalah keterampilan langka. Di dunia tech yang serba cepat, memberi ruang hening untuk berpikir justru menjadi keunggulan.</textarea>
+    </div>
+    <div>
+      <label>Slide 4 — Mindset / Slow Growth</label>
+      <input id="edMindTitle" value="Catatan untuk Diri Sendiri" oninput="renderAll()" />
+      <label style="margin-top:8px;">Isi Refleksi</label>
+      <textarea id="edMindBody" oninput="renderAll()">Tidak perlu menguasai semua framework dalam seminggu. Memahami fondasi dengan tenang jauh lebih bertahan lama.</textarea>
+    </div>
+  </div>
+</section>
+
+<main id="grid" class="grid"></main>
+
+<script>
+const W = 1080, H = 1920;
+let currentSet = 'about';
+
+function toggleEditor() {
+  document.getElementById('notesEditor').classList.toggle('open');
+}
+
+function switchSet(setName, btn) {
+  currentSet = setName;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (setName === 'notes') {
+    document.getElementById('notesEditor').classList.add('open');
+  } else {
+    document.getElementById('notesEditor').classList.remove('open');
+  }
+  renderAll();
+}
+
+function drawPaperBase(ctx, bgTop, bgBottom, drawFrame = true) {
+  const grad = ctx.createLinearGradient(0, 0, W * 0.25, H);
+  grad.addColorStop(0, bgTop);
+  grad.addColorStop(1, bgBottom);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle organic warm grain
+  ctx.fillStyle = 'rgba(46, 42, 38, 0.025)';
+  for (let i = 0; i < 4200; i++) {
+    const x = (i * 733) % W;
+    const y = (i * 1297) % H;
+    ctx.fillRect(x, y, 2, 2);
+  }
+
+  if (drawFrame) {
+    ctx.strokeStyle = 'rgba(46, 42, 38, 0.14)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(56, 56, W - 112, H - 112);
+  }
+}
+
+function drawHeaderFooter(ctx, topLeft, topRight, botLeft, botRight) {
+  ctx.fillStyle = '#6E675F';
+  ctx.font = '24px Consolas, "Courier New", monospace';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText(topLeft.toUpperCase(), 104, 210);
+  ctx.textAlign = 'right';
+  ctx.fillText(topRight.toUpperCase(), W - 104, 210);
+
+  ctx.strokeStyle = 'rgba(46, 42, 38, 0.14)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(104, H - 230);
+  ctx.lineTo(W - 104, H - 230);
+  ctx.stroke();
+
+  ctx.fillStyle = '#7D756C';
+  ctx.font = '22px Consolas, "Courier New", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(botLeft.toUpperCase(), 104, H - 180);
+  ctx.textAlign = 'right';
+  ctx.fillText(botRight.toUpperCase(), W - 104, H - 180);
+}
+
+function drawPill(ctx, text, x, y, color = '#5C554E', border = 'rgba(46,42,38,0.22)') {
+  ctx.font = '22px Consolas, "Courier New", monospace';
+  const metrics = ctx.measureText(text.toUpperCase());
+  const pw = metrics.width + 48;
+  const ph = 52;
+  ctx.strokeStyle = border;
+  ctx.lineWidth = 1.8;
+  roundRect(ctx, x, y, pw, ph, 26);
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text.toUpperCase(), x + 24, y + ph / 2 + 1);
+  return y + ph;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(/\s+/);
+  let line = '';
+  let curY = y;
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+      ctx.fillText(line.trim(), x, curY);
+      line = words[n] + ' ';
+      curY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line.trim()) {
+    ctx.fillText(line.trim(), x, curY);
+    curY += lineHeight;
+  }
+  return curY;
+}
+
+function drawCover(ctx, title, iconType) {
+  drawPaperBase(ctx, '#F4EFE6', '#E4DBCA', false);
+  ctx.fillStyle = '#F4EFE6';
+  ctx.strokeStyle = 'rgba(46, 42, 38, 0.16)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(W / 2, H / 2, 330, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  const cx = W / 2, cy = H / 2 - 48;
+  ctx.strokeStyle = '#6B7B63';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (iconType === 'leaf') {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 70);
+    ctx.lineTo(cx, cy - 45);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(220,226,215,0.55)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 25);
+    ctx.quadraticCurveTo(cx - 58, cy + 18, cx - 50, cy - 25);
+    ctx.quadraticCurveTo(cx - 10, cy - 25, cx, cy + 25);
+    ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 2);
+    ctx.quadraticCurveTo(cx + 58, cy - 10, cx + 50, cy - 52);
+    ctx.quadraticCurveTo(cx + 10, cy - 52, cx, cy - 2);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#B87A5E';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 66, 7, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Open book / notebook icon
+    ctx.fillStyle = 'rgba(220,226,215,0.45)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 35);
+    ctx.quadraticCurveTo(cx - 50, cy - 50, cx - 85, cy - 30);
+    ctx.lineTo(cx - 85, cy + 50);
+    ctx.quadraticCurveTo(cx - 45, cy + 34, cx, cy + 50);
+    ctx.quadraticCurveTo(cx + 45, cy + 34, cx + 85, cy + 50);
+    ctx.lineTo(cx + 85, cy - 30);
+    ctx.quadraticCurveTo(cx + 50, cy - 50, cx, cy - 35);
+    ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 35);
+    ctx.lineTo(cx, cy + 50);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#2E2A26';
+  ctx.font = '62px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(title, W / 2, H / 2 + 105);
+
+  ctx.fillStyle = '#7D756C';
+  ctx.font = '22px Consolas, "Courier New", monospace';
+  ctx.fillText('@SLES1401', W / 2, H / 2 + 165);
+}
+
+const aboutSlides = [
+  {
+    file: 'cover-about.png',
+    label: 'Cover: ABOUT',
+    draw: (ctx) => drawCover(ctx, 'ABOUT', 'leaf')
+  },
+  {
+    file: 'about-1-intro.png',
+    label: 'Slide 1: Perkenalan',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#F6F1E8', '#ECE4D5');
+      drawHeaderFooter(ctx, '@sles1401 · Start Here', '01 / 05', 'Warm Analog Notes', 'Intentional Tech Life');
+      let y = drawPill(ctx, '01 · Perkenalan', 104, 340);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '96px Georgia, serif';
+      ctx.fillText('Hi, I’m', 104, y + 115);
+      ctx.fillStyle = '#6B7B63';
+      ctx.font = 'italic 96px Georgia, serif';
+      ctx.fillText('Suryani.', 104, y + 225);
+
+      ctx.fillStyle = '#3D3833';
+      ctx.font = '40px "Segoe UI", sans-serif';
+      let nextY = wrapText(ctx, 'Lulusan Software Engineering yang senang mengeksplorasi dunia tech, QA & Front-End, serta belajar pelan-pelan secara intentional.', 104, y + 345, 860, 62);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.strokeStyle = 'rgba(46,42,38,0.12)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 104, nextY + 45, 872, 130, 20);
+      ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#4A443E';
+      ctx.font = 'italic 34px Georgia, serif';
+      ctx.fillText('Selamat datang di ruang catatan kecilku.', 148, nextY + 112);
+    }
+  },
+  {
+    file: 'about-2-value.png',
+    label: 'Slide 2: Isi Ruang Ini',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#F3EEE5', '#E7DFD0');
+      drawHeaderFooter(ctx, '@sles1401 · What I Share', '02 / 05', 'Learning & Curation', 'Steady Progress');
+      let y = drawPill(ctx, '02 · Isi Ruang Ini', 104, 320);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '72px Georgia, serif';
+      ctx.fillText('Di akun ini, aku banyak', 104, y + 95);
+      ctx.fillText('berbagi tentang:', 104, y + 180);
+
+      const cards = [
+        { tag: '01 / REFLEKSI TEKNIS', color: '#8C9A84', text: 'Catatan belajar & refleksi di dunia tech / QA' },
+        { tag: '02 / KURASI PELUANG', color: '#B87A5E', text: 'Peluang belajar & beasiswa digital yang terkurasi' },
+        { tag: '03 / PERTUMBUHAN', color: '#6E675F', text: 'Pengalaman mengajar & bertumbuh di industri teknologi' }
+      ];
+      let cy = y + 255;
+      for (const c of cards) {
+        ctx.fillStyle = '#FAF7F2';
+        roundRect(ctx, 104, cy, 872, 185, 18);
+        ctx.fill();
+        ctx.fillStyle = c.color;
+        ctx.fillRect(104, cy, 8, 185);
+        ctx.font = '20px Consolas, monospace';
+        ctx.fillText(c.tag, 144, cy + 48);
+        ctx.fillStyle = '#2E2A26';
+        ctx.font = '35px "Segoe UI", sans-serif';
+        wrapText(ctx, c.text, 144, cy + 102, 790, 48);
+        cy += 218;
+      }
+
+      ctx.fillStyle = '#6B7B63';
+      ctx.font = 'italic 42px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('“No rush, just steady progress.”', W / 2, cy + 65);
+    }
+  },
+  {
+    file: 'about-3-journey.png',
+    label: 'Slide 3: Jejak Perjalanan',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#E7ECE3', '#DCE2D7');
+      drawHeaderFooter(ctx, '@sles1401 · Background', '03 / 05', 'Tech & Mentorship', 'Human-Centered Pace');
+      let y = drawPill(ctx, '03 · Jejak Perjalanan', 104, 320, '#41523A', 'rgba(65,82,58,0.3)');
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '74px Georgia, serif';
+      ctx.fillText('Sedikit jejak', 104, y + 95);
+      ctx.fillText('perjalananku:', 104, y + 180);
+
+      const items = [
+        { title: 'Lulusan Software Engineering', sub: 'Fondasi rekayasa perangkat lunak & problem solving', dot: '#6B7B63' },
+        { title: 'Alumni Magang Front-End Developer di Waizly', sub: 'Pengalaman membangun produk & kolaborasi tim', dot: '#6B7B63' },
+        { title: 'Mentor Coding Camp by DBS Foundation', sub: 'Mendampingi sesama pembelajar bertumbuh di tech', dot: '#B87A5E' }
+      ];
+      ctx.strokeStyle = 'rgba(65,82,58,0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(124, y + 275);
+      ctx.lineTo(124, y + 665);
+      ctx.stroke();
+
+      let iy = y + 275;
+      for (const it of items) {
+        ctx.fillStyle = it.dot;
+        ctx.beginPath();
+        ctx.arc(124, iy, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2E2A26';
+        ctx.font = '600 36px "Segoe UI", sans-serif';
+        const next = wrapText(ctx, it.title, 164, iy + 6, 800, 48);
+        ctx.fillStyle = '#545D50';
+        ctx.font = '28px "Segoe UI", sans-serif';
+        ctx.fillText(it.sub, 164, next + 12);
+        iy += 185;
+      }
+
+      ctx.fillStyle = 'rgba(244,239,230,0.85)';
+      roundRect(ctx, 104, iy + 25, 872, 210, 20);
+      ctx.fill();
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = 'italic 35px Georgia, serif';
+      wrapText(ctx, '“Aku percaya teknologi seharusnya terasa ramah, manusiawi, dan bisa dipelajari dengan ritme masing-masing.”', 146, iy + 88, 790, 52);
+    }
+  },
+  {
+    file: 'about-4-boundaries.png',
+    label: 'Slide 4: Di Balik Layar',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#F6F2EA', '#EAE1D2');
+      drawHeaderFooter(ctx, '@sles1401 · Personal Boundaries', '04 / 05', 'Quiet Storytelling', 'Mindful Presence');
+      let y = drawPill(ctx, '04 · Di Balik Layar', 104, 340);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '76px Georgia, serif';
+      ctx.fillText('Kenapa jarang', 104, y + 100);
+      ctx.fillText('muncul di kamera?', 104, y + 188);
+
+      // Minimalist desk illustration
+      ctx.fillStyle = '#FAF7F2';
+      ctx.strokeStyle = 'rgba(46,42,38,0.12)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 104, y + 255, 872, 230, 20);
+      ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#6E675F';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(210, y + 425);
+      ctx.lineTo(870, y + 425);
+      ctx.stroke();
+      ctx.fillStyle = '#F4EFE6';
+      roundRect(ctx, 350, y + 325, 220, 100, 10);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(220,226,215,0.6)';
+      ctx.strokeStyle = '#6B7B63';
+      roundRect(ctx, 620, y + 360, 120, 65, 8);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(184,122,94,0.2)';
+      ctx.strokeStyle = '#B87A5E';
+      ctx.beginPath();
+      ctx.arc(270, y + 345, 28, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#3D3833';
+      ctx.font = '40px "Segoe UI", sans-serif';
+      let ny = wrapText(ctx, 'Aku lebih nyaman bercerita lewat tulisan, catatan proses, dan sudut-sudut tenang di balik layar.', 104, y + 570, 860, 62);
+      ctx.fillStyle = '#6B7B63';
+      ctx.font = 'italic 40px Georgia, serif';
+      wrapText(ctx, 'Kalau kamu juga lagi meniti jalan di dunia tech—kita bertumbuh bareng di sini.', 104, ny + 42, 860, 58);
+    }
+  },
+  {
+    file: 'about-5-cta.png',
+    label: 'Slide 5: Mulai Dari Sini',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#F4EFE6', '#E6DDD0');
+      drawHeaderFooter(ctx, '@sles1401 · Connect', '05 / 05', 'Suryani Lestari', 'suryani-lestari.my.id');
+      let y = drawPill(ctx, '05 · Mulai Dari Sini', 104, 330);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '78px Georgia, serif';
+      ctx.fillText('Mari bertumbuh', 104, y + 98);
+      ctx.fillText('bersama.', 104, y + 186);
+
+      ctx.fillStyle = '#FAF7F2';
+      ctx.strokeStyle = 'rgba(46,42,38,0.14)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 104, y + 250, 872, 200, 20);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#B87A5E';
+      ctx.font = '20px Consolas, monospace';
+      ctx.fillText('PORTFOLIO & WRITINGS', 144, y + 300);
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '35px "Segoe UI", sans-serif';
+      wrapText(ctx, 'Cek karya & catatan lengkapku di suryani-lestari.my.id (link di bio)', 144, y + 355, 790, 50);
+
+      ctx.fillStyle = '#FAF7F2';
+      roundRect(ctx, 104, y + 480, 872, 200, 20);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#6B7B63';
+      ctx.font = '20px Consolas, monospace';
+      ctx.fillText('OPEN CONVERSATION', 144, y + 530);
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '35px "Segoe UI", sans-serif';
+      wrapText(ctx, 'DM atau komentar kapan saja kalau mau diskusi soal tech, QA, atau bertukar cerita belajar.', 144, y + 585, 790, 50);
+
+      ctx.fillStyle = 'rgba(220,226,215,0.35)';
+      ctx.strokeStyle = 'rgba(107,123,99,0.5)';
+      ctx.setLineDash([10, 8]);
+      roundRect(ctx, 104, y + 730, 872, 160, 18);
+      ctx.fill(); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#545D50';
+      ctx.font = '22px Consolas, monospace';
+      ctx.fillText('AREA STIKER LINK / POLL INSTAGRAM', W / 2, y + 785);
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = 'italic 38px Georgia, serif';
+      ctx.fillText('Glad you’re here.', W / 2, y + 840);
+    }
+  }
+];
+
+function getVal(id) { return document.getElementById(id).value; }
+
+const notesSlides = [
+  {
+    file: 'cover-notes.png',
+    label: 'Cover: NOTES',
+    draw: (ctx) => drawCover(ctx, 'NOTES', 'book')
+  },
+  {
+    file: 'notes-1-intro.png',
+    label: 'Slide 1: Pembuka Notes',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#F5F0E7', '#EAE1D2');
+      drawHeaderFooter(ctx, '@sles1401 · Learning Archive', 'NOTES / LEARN', 'Reading & Tech Log', 'Slow Reflection');
+      let y = drawPill(ctx, 'Arsip Refleksi', 104, 340);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '88px Georgia, serif';
+      ctx.fillText('Notes &', 104, y + 110);
+      ctx.fillStyle = '#B87A5E';
+      ctx.font = 'italic 88px Georgia, serif';
+      ctx.fillText('Quiet Learnings.', 104, y + 215);
+
+      ctx.fillStyle = '#3D3833';
+      ctx.font = '38px "Segoe UI", sans-serif';
+      let ny = wrapText(ctx, 'Kumpulan catatan singkat dari buku yang kubaca, hal baru di dunia software/QA, dan pelajaran kecil yang ingin kuingat.', 104, y + 340, 860, 58);
+
+      ctx.fillStyle = '#FAF7F2';
+      ctx.strokeStyle = 'rgba(46,42,38,0.12)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 104, ny + 55, 872, 160, 20);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#6B7B63';
+      ctx.font = 'italic 34px Georgia, serif';
+      wrapText(ctx, '“Belajar bukan lomba cepat, tapi proses merawat rasa ingin tahu.”', 144, ny + 115, 790, 48);
+    }
+  },
+  {
+    file: 'notes-2-tech.png',
+    label: 'Slide 2: Template Tech / QA Note',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#E7ECE3', '#DCE2D7');
+      drawHeaderFooter(ctx, '@sles1401 · Tech Note', 'ARCHIVE #01', 'Software & QA', 'Field Notes');
+      let y = drawPill(ctx, 'Tech / QA Note', 104, 330, '#41523A', 'rgba(65,82,58,0.3)');
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '62px Georgia, serif';
+      let ny = wrapText(ctx, getVal('edTechTitle'), 104, y + 95, 870, 82);
+
+      ctx.fillStyle = '#FAF7F2';
+      ctx.strokeStyle = 'rgba(46,42,38,0.12)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 104, ny + 30, 872, 360, 22);
+      ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#3D3833';
+      ctx.font = '38px "Segoe UI", sans-serif';
+      wrapText(ctx, getVal('edTechBody'), 148, ny + 105, 784, 58);
+
+      ctx.fillStyle = '#6B7B63';
+      ctx.font = '20px Consolas, monospace';
+      ctx.fillText('KEY TAKEAWAY', 104, ny + 465);
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = 'italic 38px Georgia, serif';
+      wrapText(ctx, '→ ' + getVal('edTechTakeaway'), 104, ny + 520, 860, 54);
+    }
+  },
+  {
+    file: 'notes-3-book.png',
+    label: 'Slide 3: Template Book Note',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#F4EFE6', '#E8DFCF');
+      drawHeaderFooter(ctx, '@sles1401 · Book Note', 'ARCHIVE #02', 'Reading Log', 'Intentional Living');
+      let y = drawPill(ctx, 'Reading Note', 104, 330, '#9B6247', 'rgba(184,122,94,0.35)');
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '64px Georgia, serif';
+      let ny = wrapText(ctx, getVal('edBookTitle'), 104, y + 95, 870, 84);
+
+      ctx.fillStyle = '#B87A5E';
+      ctx.font = '600 34px "Segoe UI", sans-serif';
+      ctx.fillText(getVal('edBookName'), 104, ny + 35);
+
+      ctx.fillStyle = '#FAF7F2';
+      roundRect(ctx, 104, ny + 90, 872, 400, 22);
+      ctx.fill();
+      ctx.fillStyle = '#B87A5E';
+      ctx.fillRect(104, ny + 90, 8, 400);
+
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = 'italic 38px Georgia, serif';
+      wrapText(ctx, '“' + getVal('edBookBody') + '”', 152, ny + 165, 780, 58);
+    }
+  },
+  {
+    file: 'notes-4-reflection.png',
+    label: 'Slide 4: Refleksi Singkat',
+    draw: (ctx) => {
+      drawPaperBase(ctx, '#EFE8DA', '#E4DAC8');
+      drawHeaderFooter(ctx, '@sles1401 · Gentle Reminder', 'ARCHIVE #03', 'Slow Growth', 'Keep Learning');
+      let y = drawPill(ctx, 'Mindful Note', 104, 350);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = '68px Georgia, serif';
+      let ny = wrapText(ctx, getVal('edMindTitle'), 104, y + 100, 870, 88);
+
+      ctx.fillStyle = '#3D3833';
+      ctx.font = '42px "Segoe UI", sans-serif';
+      let by = wrapText(ctx, getVal('edMindBody'), 104, ny + 45, 860, 64);
+
+      ctx.fillStyle = 'rgba(220,226,215,0.4)';
+      ctx.strokeStyle = 'rgba(107,123,99,0.45)';
+      ctx.setLineDash([10, 8]);
+      roundRect(ctx, 104, by + 70, 872, 150, 18);
+      ctx.fill(); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#545D50';
+      ctx.font = '22px Consolas, monospace';
+      ctx.fillText('OPSIONAL: STIKER POLL / QUESTION BOX', W / 2, by + 125);
+      ctx.fillStyle = '#2E2A26';
+      ctx.font = 'italic 32px Georgia, serif';
+      ctx.fillText('“Buku atau topik apa yang lagi kamu pelajari?”', W / 2, by + 178);
+    }
+  }
+];
+
+function renderAll() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const list = currentSet === 'about' ? aboutSlides : notesSlides;
+  list.forEach((s, idx) => {
+    const card = document.createElement('div');
+    card.className = 'slide-card';
+    card.innerHTML = `
+      <div class="canvas-wrap"><canvas id="c_${idx}" width="${W}" height="${H}"></canvas></div>
+      <div class="meta">
+        <span class="title">${s.label}</span>
+        <button class="btn" onclick="downloadOne(${idx})">Download PNG</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    const canvas = card.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    s.draw(ctx);
+  });
+}
+
+function downloadOne(idx) {
+  const list = currentSet === 'about' ? aboutSlides : notesSlides;
+  const canvas = document.getElementById('c_' + idx);
+  const a = document.createElement('a');
+  a.download = list[idx].file;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+function downloadAll() {
+  const list = currentSet === 'about' ? aboutSlides : notesSlides;
+  list.forEach((_, idx) => {
+    setTimeout(() => downloadOne(idx), idx * 250);
+  });
+}
+
+renderAll();
+</script>
+</body>
+</html>
